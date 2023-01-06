@@ -6,6 +6,7 @@ import com.example.app.exception.CorrectPictureAlreadySubmittedException;
 import com.example.app.exception.IncorrectPictureException;
 import com.example.app.exception.InvalidUserDataException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PictureService {
     private final Map<String, User> users = new ConcurrentHashMap<>();
@@ -25,8 +27,12 @@ public class PictureService {
     }
 
     private void validatePicture(PictureSubmissionRequest request, User user) {
-        var picture = request.pictureSubmission();
-        if (picture.equals(nasaClientService.getLargestPicture())) {
+        var picture = request.pictureSubmission().picture();
+        log.info("Calling NASA to get the largest picture URL....");
+        long start = System.nanoTime();
+        var correctPicture = nasaClientService.getLargestPicture();
+        log.info("Got picture in " + (System.nanoTime() - start) /1000_000_000 + " seconds");
+        if (picture.equals(correctPicture)) {
             users.put(request.address(), user);
         } else {
             throw new IncorrectPictureException();

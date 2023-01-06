@@ -4,6 +4,7 @@ import com.example.app.dto.Picture;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,6 +18,7 @@ public class NasaClientService {
     @Value("${nasa.api.url}")
     private String nasaApiUrl;
 
+    @Cacheable("largestPicture")
     public Picture getLargestPicture() {
         var jsonResponse = restTemplate.getForObject(nasaApiUrl, JsonNode.class);
         return StreamSupport.stream(jsonResponse.get("photos").spliterator(), true)
